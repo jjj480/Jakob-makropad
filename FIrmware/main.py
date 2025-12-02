@@ -1,0 +1,88 @@
+import board
+
+from kmk.kmk_keyboard import KMKKeyboard
+from kmk.scanners.keypad import KeysScanner
+from kmk.modules.macros import Macros
+from kmk.modules.encoder import EncoderHandler
+from kmk.extensions.rgb import RGB, AnimationModes
+from kmk.keys import KC
+
+
+keyboard = KMKKeyboard()
+
+# ---- MODULES ----
+macros = Macros()
+keyboard.modules.append(macros)
+
+encoder = EncoderHandler()
+keyboard.modules.append(encoder)
+
+# ---- RGB LED an Pin D1 ----
+rgb = RGB(
+    pixel_pin=board.D1,
+    num_pixels=1,
+    animation_mode=AnimationModes.STATIC,
+    hue_default=0.6,
+    sat_default=1,
+    val_default=0.2,
+)
+keyboard.extensions.append(rgb)
+
+# ---- PIN BELEGUNG ----
+# D1 = RGB
+# D2, D5, D8–D11 = Switches
+# D3–D4 = Volume Encoder
+# D6–D7 = unassigned Encoder
+PINS = [
+    board.D2,   # Switch
+    board.D3,   # Encoder A (volume)
+    board.D4,   # Encoder B (volume)
+    board.D5,   # Switch
+    board.D6,   # Encoder 2 A (unused)
+    board.D7,   # Encoder 2 B (unused)
+    board.D8,   # Switch
+    board.D9,   # Switch
+    board.D10,  # Switch
+    board.D11,  # Switch
+]
+
+keyboard.matrix = KeysScanner(
+    pins=PINS,
+    value_when_pressed=False,
+)
+
+# ---- ENCODER CONFIG ----
+# encoder index order = the order they appear in matrix
+# Encoder 1 = on D3 & D4 -> Lautstärke
+# Encoder 2 = on D6 & D7 -> unassigned (None)
+
+encoder.pins = (
+    (3, 4, False),   # encoder 1 -> volume
+    (5, 6, False),   # encoder 2 -> unused
+)
+
+encoder.map = [
+    # Encoder 1
+    ((KC.VOLD, KC.VOLU),),
+    # Encoder 2
+    ((None, None),),
+]
+
+# ---- KEYMAP ----
+keyboard.keymap = [
+    [
+        KC.NO,  # D2
+        KC.NO,  # D3
+        KC.NO,  # D4
+        KC.NO,  # D5
+        KC.NO,  # D6
+        KC.NO,  # D7
+        KC.NO,  # D8
+        KC.NO,  # D9
+        KC.NO,  # D10
+        KC.NO,  # D11
+    ]
+]
+
+if __name__ == '__main__':
+    keyboard.go()
